@@ -18,13 +18,14 @@ module Stackup
     def create(template, parameters)
       response = cf.create_stack(:stack_name => name,
                                  :template_body => template,
-                                 :disable_rollback => true,
+                                 :disable_rollback => false,
                                  :parameters => parameters)
       wait_till_end
       !response[:stack_id].nil?
     end
 
     def deploy(template, parameters = [])
+      delete if stack.stack_status == "ROLLBACK_COMPLETE"
       if deployed?
         update(template, parameters)
       else

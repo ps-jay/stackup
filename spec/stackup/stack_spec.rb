@@ -15,13 +15,23 @@ describe Stackup::Stack do
   context "deploy" do
 
     it "should call create if stack is not deployed" do
+      allow(cf_stack).to receive(:stack_status)
       allow(stack).to receive(:deployed?).and_return(false)
       expect(stack).to receive(:create).and_return(true)
       expect(stack.deploy(template, parameters)).to be true
     end
     it "should call update if stack is deployed" do
+      allow(cf_stack).to receive(:stack_status)
       allow(stack).to receive(:deployed?).and_return(true)
       expect(stack).to receive(:update).and_return(true)
+      expect(stack.deploy(template, parameters)).to be true
+    end
+
+    it "should delete if stack is in ROLLBACK_COMPLETE state" do
+      allow(cf_stack).to receive(:stack_status).and_return("ROLLBACK_COMPLETE")
+      allow(stack).to receive(:delete)
+      allow(stack).to receive(:deployed?).and_return(false)
+      expect(stack).to receive(:create).and_return(true)
       expect(stack.deploy(template, parameters)).to be true
     end
   end
