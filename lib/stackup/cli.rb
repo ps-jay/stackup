@@ -11,7 +11,7 @@ module Stackup
         def execute
           params = JSON.parse(parameters)
           stack = Stackup::Stack.new(stack_name)
-          stack.create(template, params)
+          stack.deploy(template, params)
         end
       end
 

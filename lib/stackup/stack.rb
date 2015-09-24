@@ -25,13 +25,15 @@ module Stackup
     end
 
     def deploy(template, parameters = [])
-      delete if stack.stack_status == "ROLLBACK_COMPLETE"
+      delete if deployed? && (stack.stack_status == "ROLLBACK_COMPLETE")
       if deployed?
         update(template, parameters)
       else
         create(template, parameters)
       end
     rescue Aws::CloudFormation::Errors::ValidationError => e
+      puts e.message
+    rescue Aws::CloudFormation::Errors::AlreadyExistsException => e
       puts e.message
     end
 
@@ -75,7 +77,7 @@ module Stackup
     private
 
     def wait_till_end
-      stack.wait_until(:max_attempts => 1000, :delay => 10) { |resource| display_events; END_STATES.include?(resource.stack_status) }
+      stack.wait_until(:max_attempts => 1000, :delay => 10) { |resource| display_events;  END_STATES.include?(resource.stack_status) }
     end
 
   end
